@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Content {
+  id          String   @id @default(uuid())
+  type        String   // TEXT, IMAGE, MANGA
+  source      String   // PIXIV, LOFTER, TWITTER, MANUAL
+  sourceUrl   String   @unique
+  sourceId    String?
+  title       String?
+  authorName  String?
+  authorId    String?
+  images      String   @default("[]") // JSON array
+  textContent String?
+  likes       Int      @default(0)
+  favorites   Int      @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tags        ContentTag[]
+}
+
+model Tag {
+  id       String       @id @default(uuid())
+  name     String       @unique
+  category String?
+  contents ContentTag[]
+}
+
+model ContentTag {
+  contentId String
+  tagId     String
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@id([contentId, tagId])
+}
+
+model CrawlerTask {
+  id         String   @id @default(uuid())
+  name       String
+  source     String   // PIXIV, LOFTER
+  keywords   String   @default("[]") // JSON array
+  status     String   @default("IDLE") // IDLE, RUNNING, PAUSED, ERROR
+  schedule   String?
+  lastRunAt  DateTime?
+  nextRunAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  logs       CrawlerLog[]
+}
+
+model CrawlerLog {
+  id        String      @id @default(uuid())
+  taskId    String
+  task      CrawlerTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  message   String
+  level     String      @default("info")
+  createdAt DateTime    @default(now())
+}

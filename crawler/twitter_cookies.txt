@@ -1,0 +1,8 @@
+# Netscape HTTP Cookie File
+.x.com	TRUE	/	TRUE	0	guest_id	v1%3A176956916966327658
+.x.com	TRUE	/	TRUE	0	guest_id_marketing	v1%3A176956916966327658
+.x.com	TRUE	/	TRUE	0	guest_id_ads	v1%3A176956916966327658
+.x.com	TRUE	/	TRUE	0	personalization_id	"v1_V8kXTaMVRX9JTrFhChMaAw=="
+.x.com	TRUE	/	TRUE	0	ct0	6da7c61d37978c28e403e8fa7f53fccd90e08bd45ba55f2a786ffee636321b745526ce1b510c2b6bbe343931e5f86a7d7f50fb3ef507091f051b69e18b710eeb1227f9241107ac4c977f913ba08e3316
+.x.com	TRUE	/	TRUE	0	twid	u%3D1960128282986496000
+.x.com	TRUE	/	TRUE	0	lang	en
