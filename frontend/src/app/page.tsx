@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Lightbox from '@/components/Lightbox';
 
 interface Content {
@@ -18,29 +18,11 @@ interface Content {
   createdAt: string;
 }
 
-interface ApiResponse {
-  items: Content[];
-  total: number;
-  page: number;
-  totalPages: number;
-}
-
-const API_URL = 'http://localhost:3001/api';
-
-// Proxy Pixiv images through our backend
-const getProxiedImageUrl = (url: string, source: string) => {
-  if (source === 'PIXIV' && url.includes('pximg.net')) {
-    return `${API_URL}/proxy/image?url=${encodeURIComponent(url)}`;
-  }
-  return url;
-};
-
 export default function Home() {
-  const [contents, setContents] = useState<Content[]>([]);
+  const [allContents, setAllContents] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState({ type: '', source: '' });
-  const [stats, setStats] = useState({ total: 0, byType: {}, bySource: {} });
   
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -49,84 +31,64 @@ export default function Home() {
   const [lightboxTitle, setLightboxTitle] = useState('');
   const [lightboxSource, setLightboxSource] = useState('');
 
+  // 加载静态数据
   useEffect(() => {
-    fetchContents();
-    fetchStats();
-  }, [filter]);
+    fetch('/data.json')
+      .then(res => res.json())
+      .then(data => {
+        setAllContents(data || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load data:', err);
+        setLoading(false);
+      });
+  }, []);
 
-  const fetchContents = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (filter.type) params.set('type', filter.type);
-      if (filter.source) params.set('source', filter.source);
-      if (search) params.set('search', search);
-      params.set('limit', '50');
-
-      const res = await fetch(`${API_URL}/content?${params}`);
-      const data: ApiResponse = await res.json();
-      setContents(data.items || []);
-    } catch (error) {
-      console.error('Failed to fetch contents:', error);
-    } finally {
-      setLoading(false);
+  // 过滤和搜索
+  const contents = useMemo(() => {
+    let filtered = allContents;
+    
+    if (filter.type) {
+      filtered = filtered.filter(c => c.type === filter.type);
     }
-  };
-
-  const fetchStats = async () => {
-    try {
-      const res = await fetch(`${API_URL}/content/stats`);
-      const data = await res.json();
-      setStats(data);
-    } catch (error) {
-      console.error('Failed to fetch stats:', error);
+    if (filter.source) {
+      filtered = filtered.filter(c => c.source === filter.source);
     }
-  };
+    if (search) {
+      const s = search.toLowerCase();
+      filtered = filtered.filter(c => 
+        (c.title?.toLowerCase().includes(s)) ||
+        (c.authorName?.toLowerCase().includes(s)) ||
+        c.tags.some(t => t.toLowerCase().includes(s))
+      );
+    }
+    
+    return filtered;
+  }, [allContents, filter, search]);
+
+  // 统计
+  const stats = useMemo(() => {
+    const byType: Record<string, number> = {};
+    const bySource: Record<string, number> = {};
+    allContents.forEach(c => {
+      byType[c.type] = (byType[c.type] || 0) + 1;
+      bySource[c.source] = (bySource[c.source] || 0) + 1;
+    });
+    return { total: allContents.length, byType, bySource };
+  }, [allContents]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchContents();
   };
 
-  const handleLike = async (id: string) => {
-    try {
-      await fetch(`${API_URL}/content/${id}/like`, { method: 'POST' });
-      setContents(contents.map(c => 
-        c.id === id ? { ...c, likes: c.likes + 1 } : c
-      ));
-    } catch (error) {
-      console.error('Failed to like:', error);
-    }
-  };
-
-  const handleFavorite = async (id: string) => {
-    try {
-      await fetch(`${API_URL}/content/${id}/favorite`, { method: 'POST' });
-      setContents(contents.map(c => 
-        c.id === id ? { ...c, favorites: c.favorites + 1 } : c
-      ));
-    } catch (error) {
-      console.error('Failed to favorite:', error);
-    }
-  };
-
-  const fetchRandom = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/content/random?limit=20`);
-      const data = await res.json();
-      setContents(data || []);
-    } catch (error) {
-      console.error('Failed to fetch random:', error);
-    } finally {
-      setLoading(false);
-    }
+  const fetchRandom = () => {
+    const shuffled = [...allContents].sort(() => Math.random() - 0.5);
+    setAllContents(shuffled);
   };
 
   const openLightbox = (content: Content, imageIndex: number = 0) => {
-    // 转换所有图片URL为代理URL
-    const proxiedImages = content.images.map(img => getProxiedImageUrl(img, content.source));
-    setLightboxImages(proxiedImages);
+    setLightboxImages(content.images);
     setLightboxIndex(imageIndex);
     setLightboxTitle(content.title || '作品');
     setLightboxSource(content.source);
@@ -147,7 +109,6 @@ export default function Home() {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Download failed:', error);
-      // 如果直接下载失败，尝试在新窗口打开
       window.open(url, '_blank');
     }
   };
@@ -156,14 +117,10 @@ export default function Home() {
     if (content.images.length === 0) return;
     
     for (let i = 0; i < content.images.length; i++) {
-      const url = getProxiedImageUrl(content.images[i], content.source);
-      const ext = content.images[i].includes('.png') ? 'png' : 
-                  content.images[i].includes('.gif') ? 'gif' : 'jpg';
+      const url = content.images[i];
+      const ext = url.includes('.png') ? 'png' : url.includes('.gif') ? 'gif' : 'jpg';
       const filename = `${(content.title || 'image').replace(/[<>:"/\\|?*]/g, '_')}_${i + 1}.${ext}`;
-      
       await handleDownload(url, filename);
-      
-      // 小延迟避免浏览器阻止多个下载
       if (i < content.images.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
@@ -195,9 +152,6 @@ export default function Home() {
               <span className="text-sm text-purple-600">
                 共 {stats.total} 个作品
               </span>
-              <a href="/admin" className="text-sm text-pink-500 hover:text-pink-600">
-                管理后台 →
-              </a>
             </div>
           </div>
         </div>
@@ -214,9 +168,6 @@ export default function Home() {
               onChange={(e) => setSearch(e.target.value)}
               className="search-box flex-1"
             />
-            <button type="submit" className="btn-primary">
-              搜索
-            </button>
             <button type="button" onClick={fetchRandom} className="btn-primary bg-gradient-to-r from-purple-400 to-pink-400">
               🎲 随机
             </button>
@@ -234,19 +185,19 @@ export default function Home() {
               onClick={() => setFilter({ ...filter, type: 'IMAGE' })}
               className={`tag ${filter.type === 'IMAGE' ? 'ring-2 ring-purple-400' : ''}`}
             >
-              🖼️ 插画
+              🖼️ 插画 ({stats.byType['IMAGE'] || 0})
             </button>
             <button
               onClick={() => setFilter({ ...filter, type: 'TEXT' })}
               className={`tag ${filter.type === 'TEXT' ? 'ring-2 ring-purple-400' : ''}`}
             >
-              📝 小说
+              📝 小说 ({stats.byType['TEXT'] || 0})
             </button>
             <button
               onClick={() => setFilter({ ...filter, type: 'MANGA' })}
               className={`tag ${filter.type === 'MANGA' ? 'ring-2 ring-purple-400' : ''}`}
             >
-              📚 漫画
+              📚 漫画 ({stats.byType['MANGA'] || 0})
             </button>
 
             <span className="mx-2 text-pink-300">|</span>
@@ -262,13 +213,13 @@ export default function Home() {
               onClick={() => setFilter({ ...filter, source: 'PIXIV' })}
               className={`tag ${filter.source === 'PIXIV' ? 'ring-2 ring-purple-400' : ''}`}
             >
-              Pixiv
+              Pixiv ({stats.bySource['PIXIV'] || 0})
             </button>
             <button
-              onClick={() => setFilter({ ...filter, source: 'LOFTER' })}
-              className={`tag ${filter.source === 'LOFTER' ? 'ring-2 ring-purple-400' : ''}`}
+              onClick={() => setFilter({ ...filter, source: 'TWITTER' })}
+              className={`tag ${filter.source === 'TWITTER' ? 'ring-2 ring-purple-400' : ''}`}
             >
-              Lofter
+              Twitter ({stats.bySource['TWITTER'] || 0})
             </button>
           </div>
         </div>
@@ -281,19 +232,18 @@ export default function Home() {
         ) : contents.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">🌸</div>
-            <p className="text-purple-400 text-lg">还没有内容哦～</p>
-            <p className="text-purple-300 text-sm mt-2">运行爬虫或手动添加一些作品吧！</p>
+            <p className="text-purple-400 text-lg">没有找到相关内容～</p>
           </div>
         ) : (
           <div className="masonry">
-            {contents.map((content) => (
+            {contents.slice(0, 100).map((content) => (
               <div key={content.id} className="masonry-item">
                 <div className="content-card">
                   {/* Image */}
                   {content.images.length > 0 && (
                     <div className="relative group cursor-pointer" onClick={() => openLightbox(content, 0)}>
                       <img
-                        src={getProxiedImageUrl(content.images[0], content.source)}
+                        src={content.images[0]}
                         alt={content.title || '作品'}
                         className="w-full object-cover"
                         loading="lazy"
@@ -380,26 +330,16 @@ export default function Home() {
                         <span key={tag} className="tag text-xs">{tag}</span>
                       ))}
                     </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-4 text-sm">
-                      <button
-                        onClick={() => handleLike(content.id)}
-                        className="flex items-center gap-1 text-pink-400 hover:text-pink-500"
-                      >
-                        ❤️ {content.likes}
-                      </button>
-                      <button
-                        onClick={() => handleFavorite(content.id)}
-                        className="flex items-center gap-1 text-purple-400 hover:text-purple-500"
-                      >
-                        ⭐ {content.favorites}
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+        )}
+        
+        {contents.length > 100 && (
+          <div className="text-center py-8 text-purple-400">
+            显示前 100 个结果，共 {contents.length} 个
           </div>
         )}
       </main>
