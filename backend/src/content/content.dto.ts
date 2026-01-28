@@ -2,7 +2,7 @@ import { IsString, IsOptional, IsArray, IsIn, IsDateString, IsNumber } from 'cla
 import { Type } from 'class-transformer';
 
 const CONTENT_TYPES = ['TEXT', 'IMAGE', 'MANGA'] as const;
-const CONTENT_SOURCES = ['PIXIV', 'LOFTER', 'TWITTER', 'MANUAL'] as const;
+const CONTENT_SOURCES = ['PIXIV', 'LOFTER', 'TWITTER', 'YANDERE', 'KONACHAN', 'DANBOORU', 'GELBOORU', 'MANUAL'] as const;
 
 export class CreateContentDto {
   @IsIn(CONTENT_TYPES)

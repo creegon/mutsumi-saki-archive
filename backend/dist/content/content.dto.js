@@ -13,7 +13,7 @@ exports.QueryContentDto = exports.UpdateContentDto = exports.CreateContentDto = 
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const CONTENT_TYPES = ['TEXT', 'IMAGE', 'MANGA'];
-const CONTENT_SOURCES = ['PIXIV', 'LOFTER', 'TWITTER', 'MANUAL'];
+const CONTENT_SOURCES = ['PIXIV', 'LOFTER', 'TWITTER', 'YANDERE', 'KONACHAN', 'DANBOORU', 'GELBOORU', 'MANUAL'];
 class CreateContentDto {
     type;
     source;

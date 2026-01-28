@@ -7,8 +7,6 @@ export declare class ContentController {
         items: {
             images: any;
             tags: string[];
-            createdAt: Date;
-            id: string;
             type: string;
             source: string;
             sourceUrl: string;
@@ -20,6 +18,8 @@ export declare class ContentController {
             likes: number;
             favorites: number;
             publishedAt: Date | null;
+            id: string;
+            createdAt: Date;
             updatedAt: Date;
         }[];
         total: number;
@@ -30,8 +30,6 @@ export declare class ContentController {
     findRandom(limit?: string, type?: string): Promise<{
         images: any;
         tags: string[];
-        createdAt: Date;
-        id: string;
         type: string;
         source: string;
         sourceUrl: string;
@@ -43,6 +41,8 @@ export declare class ContentController {
         likes: number;
         favorites: number;
         publishedAt: Date | null;
+        id: string;
+        createdAt: Date;
         updatedAt: Date;
     }[]>;
     getStats(): Promise<{
@@ -53,8 +53,6 @@ export declare class ContentController {
     findOne(id: string): Promise<{
         images: any;
         tags: string[];
-        createdAt: Date;
-        id: string;
         type: string;
         source: string;
         sourceUrl: string;
@@ -66,13 +64,13 @@ export declare class ContentController {
         likes: number;
         favorites: number;
         publishedAt: Date | null;
+        id: string;
+        createdAt: Date;
         updatedAt: Date;
     } | null>;
     create(dto: CreateContentDto): Promise<{
         images: any;
         tags: string[];
-        createdAt: Date;
-        id: string;
         type: string;
         source: string;
         sourceUrl: string;
@@ -84,13 +82,13 @@ export declare class ContentController {
         likes: number;
         favorites: number;
         publishedAt: Date | null;
+        id: string;
+        createdAt: Date;
         updatedAt: Date;
     } | null>;
     update(id: string, dto: UpdateContentDto): Promise<{
         images: any;
         tags: string[];
-        createdAt: Date;
-        id: string;
         type: string;
         source: string;
         sourceUrl: string;
@@ -102,6 +100,8 @@ export declare class ContentController {
         likes: number;
         favorites: number;
         publishedAt: Date | null;
+        id: string;
+        createdAt: Date;
         updatedAt: Date;
     } | null>;
     delete(id: string): Promise<{
@@ -109,8 +109,6 @@ export declare class ContentController {
     }>;
     like(id: string): Promise<{
         images: any;
-        createdAt: Date;
-        id: string;
         type: string;
         source: string;
         sourceUrl: string;
@@ -122,12 +120,12 @@ export declare class ContentController {
         likes: number;
         favorites: number;
         publishedAt: Date | null;
+        id: string;
+        createdAt: Date;
         updatedAt: Date;
     }>;
     favorite(id: string): Promise<{
         images: any;
-        createdAt: Date;
-        id: string;
         type: string;
         source: string;
         sourceUrl: string;
@@ -139,6 +137,8 @@ export declare class ContentController {
         likes: number;
         favorites: number;
         publishedAt: Date | null;
+        id: string;
+        createdAt: Date;
         updatedAt: Date;
     }>;
 }
