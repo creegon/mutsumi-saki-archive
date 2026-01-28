@@ -203,7 +203,6 @@ export default function Lightbox({
           onLoad={() => setIsLoading(false)}
           onError={() => setIsLoading(false)}
           referrerPolicy="no-referrer"
-          crossOrigin="anonymous"
         />
       </div>
 

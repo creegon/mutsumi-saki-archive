@@ -270,7 +270,6 @@ export default function Home() {
                         className="w-full object-cover"
                         loading="lazy"
                         referrerPolicy="no-referrer"
-                        crossOrigin="anonymous"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect fill="%23fce7f3" width="400" height="300"/><text fill="%23e879a9" font-size="20" x="50%" y="50%" text-anchor="middle">🌸 图片加载失败</text></svg>';
                         }}
