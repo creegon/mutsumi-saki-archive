@@ -3,6 +3,21 @@
 import { useState, useEffect, useMemo } from 'react';
 import Lightbox from '@/components/Lightbox';
 
+// 图片代理函数 - 处理防盗链
+function proxyImage(url: string): string {
+  if (!url) return '';
+  // Yande.re, Konachan, Danbooru 等需要代理
+  if (url.includes('yande.re') || url.includes('konachan.com') || url.includes('donmai.us')) {
+    // 使用 wsrv.nl 免费图片代理
+    return `https://wsrv.nl/?url=${encodeURIComponent(url)}`;
+  }
+  // Pixiv 图片也需要代理
+  if (url.includes('pximg.net') || url.includes('pixiv')) {
+    return `https://wsrv.nl/?url=${encodeURIComponent(url)}`;
+  }
+  return url;
+}
+
 interface Content {
   id: string;
   type: string;
@@ -88,7 +103,7 @@ export default function Home() {
   };
 
   const openLightbox = (content: Content, imageIndex: number = 0) => {
-    setLightboxImages(content.images);
+    setLightboxImages(content.images.map(proxyImage));
     setLightboxIndex(imageIndex);
     setLightboxTitle(content.title || '作品');
     setLightboxSource(content.source);
@@ -243,7 +258,7 @@ export default function Home() {
                   {content.images.length > 0 && (
                     <div className="relative group cursor-pointer" onClick={() => openLightbox(content, 0)}>
                       <img
-                        src={content.images[0]}
+                        src={proxyImage(content.images[0])}
                         alt={content.title || '作品'}
                         className="w-full object-cover"
                         loading="lazy"
