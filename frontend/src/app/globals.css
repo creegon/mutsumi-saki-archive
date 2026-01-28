@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fdf2f8;
+  --foreground: #4a1d5c;
+  --primary: #e879a9;
+  --primary-light: #fbcfe8;
+  --secondary: #c4b5fd;
+  --accent: #f0abfc;
+  --card: #ffffff;
+  --card-hover: #fce7f3;
+}
+
+body {
+  background: linear-gradient(135deg, #fdf2f8 0%, #f5f3ff 50%, #fce7f3 100%);
+  min-height: 100vh;
+  overflow-y: auto !important;
+  height: auto !important;
+}
+
+html {
+  overflow-y: auto !important;
+  height: auto !important;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}
+
+/* 瀑布流布局 */
+.masonry {
+  column-count: 4;
+  column-gap: 1rem;
+}
+
+@media (max-width: 1280px) {
+  .masonry {
+    column-count: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .masonry {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .masonry {
+    column-count: 1;
+  }
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+/* 卡片悬浮效果 */
+.content-card {
+  transition: all 0.3s ease;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(232, 121, 169, 0.1), 0 2px 4px -1px rgba(232, 121, 169, 0.06);
+}
+
+.content-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(232, 121, 169, 0.15), 0 10px 10px -5px rgba(232, 121, 169, 0.08);
+}
+
+/* 粉紫色渐变按钮 */
+.btn-primary {
+  background: linear-gradient(135deg, #e879a9 0%, #c084fc 100%);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 15px -3px rgba(232, 121, 169, 0.3);
+}
+
+/* 标签样式 */
+.tag {
+  background: linear-gradient(135deg, #fbcfe8 0%, #e9d5ff 100%);
+  color: #7c3aed;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* 搜索框 */
+.search-box {
+  background: white;
+  border: 2px solid #fbcfe8;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.search-box:focus {
+  outline: none;
+  border-color: #e879a9;
+  box-shadow: 0 0 0 4px rgba(232, 121, 169, 0.1);
+}
