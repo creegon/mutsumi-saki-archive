@@ -4,10 +4,24 @@ import { useState, useEffect, useMemo } from 'react';
 import Lightbox from '@/components/Lightbox';
 
 // 图片代理函数 - 处理防盗链
-// 现在用 referrerPolicy="no-referrer" 所以大部分不需要代理了
 function proxyImage(url: string): string {
   if (!url) return '';
-  // 直接返回原 URL，靠 referrerPolicy 绕过防盗链
+  
+  // Pixiv 图片 - 使用 pixiv.re 代理
+  if (url.includes('i.pximg.net')) {
+    return url.replace('i.pximg.net', 'i.pixiv.re');
+  }
+  
+  // Yande.re - 换成缩略图（sample）
+  if (url.includes('files.yande.re/image/')) {
+    return url.replace('/image/', '/sample/').replace(/\.(jpg|png)$/, '.jpg');
+  }
+  
+  // Konachan - 换成缩略图
+  if (url.includes('konachan.com/image/')) {
+    return url.replace('/image/', '/sample/');
+  }
+  
   return url;
 }
 

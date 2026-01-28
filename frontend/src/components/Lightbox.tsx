@@ -2,6 +2,21 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+// 图片代理函数
+function proxyImage(url: string): string {
+  if (!url) return '';
+  if (url.includes('i.pximg.net')) {
+    return url.replace('i.pximg.net', 'i.pixiv.re');
+  }
+  if (url.includes('files.yande.re/image/')) {
+    return url.replace('/image/', '/sample/').replace(/\.(jpg|png)$/, '.jpg');
+  }
+  if (url.includes('konachan.com/image/')) {
+    return url.replace('/image/', '/sample/');
+  }
+  return url;
+}
+
 interface LightboxProps {
   images: string[];
   initialIndex?: number;
@@ -11,7 +26,7 @@ interface LightboxProps {
   onDownload?: (url: string, filename: string) => void;
 }
 
-export default function Lightbox({ 
+export default function Lightbox({
   images, 
   initialIndex = 0, 
   title, 
@@ -23,7 +38,7 @@ export default function Lightbox({
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const currentImage = images[currentIndex];
+  const currentImage = proxyImage(images[currentIndex]);
   const hasMultiple = images.length > 1;
 
   const goNext = useCallback(() => {
@@ -208,7 +223,7 @@ export default function Lightbox({
               }`}
             >
               <img
-                src={img}
+                src={proxyImage(img)}
                 alt={`缩略图 ${idx + 1}`}
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
