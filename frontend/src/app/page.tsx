@@ -4,17 +4,10 @@ import { useState, useEffect, useMemo } from 'react';
 import Lightbox from '@/components/Lightbox';
 
 // 图片代理函数 - 处理防盗链
+// 现在用 referrerPolicy="no-referrer" 所以大部分不需要代理了
 function proxyImage(url: string): string {
   if (!url) return '';
-  // Yande.re, Konachan, Danbooru 等需要代理
-  if (url.includes('yande.re') || url.includes('konachan.com') || url.includes('donmai.us')) {
-    // 使用 wsrv.nl 免费图片代理
-    return `https://wsrv.nl/?url=${encodeURIComponent(url)}`;
-  }
-  // Pixiv 图片也需要代理
-  if (url.includes('pximg.net') || url.includes('pixiv')) {
-    return `https://wsrv.nl/?url=${encodeURIComponent(url)}`;
-  }
+  // 直接返回原 URL，靠 referrerPolicy 绕过防盗链
   return url;
 }
 
@@ -262,6 +255,8 @@ export default function Home() {
                         alt={content.title || '作品'}
                         className="w-full object-cover"
                         loading="lazy"
+                        referrerPolicy="no-referrer"
+                        crossOrigin="anonymous"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect fill="%23fce7f3" width="400" height="300"/><text fill="%23e879a9" font-size="20" x="50%" y="50%" text-anchor="middle">🌸 图片加载失败</text></svg>';
                         }}

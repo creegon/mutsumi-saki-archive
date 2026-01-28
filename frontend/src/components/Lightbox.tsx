@@ -187,6 +187,8 @@ export default function Lightbox({
           className={`max-w-full max-h-[90vh] object-contain transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
           onLoad={() => setIsLoading(false)}
           onError={() => setIsLoading(false)}
+          referrerPolicy="no-referrer"
+          crossOrigin="anonymous"
         />
       </div>
 
@@ -209,6 +211,7 @@ export default function Lightbox({
                 src={img}
                 alt={`缩略图 ${idx + 1}`}
                 className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
               />
             </button>
           ))}
